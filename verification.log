@@ -1,0 +1,7 @@
+[Task 2] Department Identity — $(date)
+Command: getent group engineering sales hr finance
+engineering:x:1002:
+sales:x:1003:
+hr:x:1004:
+finance:x:1005:
+Status: PASS — all four groups exist, no members assigned yet.Result:
