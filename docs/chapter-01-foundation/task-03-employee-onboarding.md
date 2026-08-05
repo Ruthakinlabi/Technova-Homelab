@@ -1,129 +1,163 @@
-Task 3 — Employee Onboarding
-Business Requirement
+# Task 3 — Employee Onboarding
 
-With the departmental structure established, TechNova Solutions Ltd. is ready to onboard its first employees.
+## Business Requirement
 
-Each employee requires a secure Linux account to access company resources. To ensure consistency across the organization, every account must:
+With the departmental structure established (Tasks 1–2), TechNova Solutions
+Ltd. is ready to onboard its first employees.
 
-Have a personal home directory.
-Use Bash as the default login shell.
-Belong to the appropriate department group.
-Receive an initial password.
-Be required to change the password upon first login.
+Each employee requires a secure Linux account to access company resources.
+To ensure consistency across the organization, every account must:
 
-Department Administrators will later assume ownership of departmental resources, making user creation a prerequisite for future permission management tasks.
+- Have a personal home directory.
+- Use Bash as the default login shell.
+- Belong to the appropriate department group.
+- Receive an initial password.
+- Be required to change the password upon first login.
 
-Environment
-Operating System: Ubuntu 24.04 LTS (WSL2)
-Filesystem: Native Linux filesystem
-Project: TechNova Homelab
-Current Phase: Chapter 1 – Building the Foundation
-Technical Objective
+Department Administrators will later assume ownership of departmental
+resources, making user creation a prerequisite for future permission
+management tasks.
 
-Provision Linux user accounts for all TechNova employees while implementing a consistent identity management model that supports future growth.
+##Provision Linux user accounts for all TechNova employees, implementing a
+consistent identity model that supports future growth. Each account
+includes: home directory, Bash login shell, department-based primary
+group, GECOS full-name field, temporary password, and mandatory password
+reset at first login.
 
-Each user account should include:
+## Username Convention
 
-Home directory
-Bash login shell
-Department-based primary group
-User information (GECOS field)
-Temporary password
-Mandatory password reset at first login
-Username Convention
+| Employee          | Department            | Username    |
+|-------------------|------------------------|-------------|
+| Emmanuel Adeyemi  | Engineering (Admin)    | `eadeyemi`  |
+| Michael Ogunleye  | Engineering            | `mogunleye` |
+| Esther Bello      | Engineering            | `ebello`    |
+| Grace Okoro       | Sales (Admin)          | `goko`      |
+| Sunday Adebayo    | Sales                  | `sade`      |
+| David James       | Sales                  | `djam`      |
+| Deborah Ibrahim   | Finance (Admin)        | `dibr`      |
+| Chioma Eze        | Finance                | `ceze`      |
+| Favour Akinyemi   | Finance                | `faki`      |
+| Daniel Ojo        | HR (Admin)             | `dojo`      |
+| Samuel Akinwale   | HR                     | `saki`      |
+| Ruth Akinlabi     | HR                     | `raki`      |
 
-To keep usernames short, unique, and easy to remember, TechNova uses abbreviated usernames rather than full surnames.
+## Commands Used
 
-Examples:
+```bash
+# Engineering
+sudo useradd -m -s /bin/bash -g engineering -c "Emmanuel Adeyemi" eadeyemi
+sudo useradd -m -s /bin/bash -g engineering -c "Michael Ogunleye" mogunleye
+sudo useradd -m -s /bin/bash -g engineering -c "Esther Bello" ebello
 
-Employee	Username
-Emmanuel Adeyemi	eadeyemi
-Michael Ogunleye	mogunleye
-Esther Bello	ebello
-Grace Okoro	goko
-Sunday Adebayo	sade
-David James	djam
-Daniel Ojo	dojo
-Samuel Akinwale	saki
-Ruth Akinlabi	raki
-Deborah Ibrahim	dibr
-Favour Akinyemi	faki
-Chioma Eze	ceze
+# Sales
+sudo useradd -m -s /bin/bash -g sales -c "Grace Okoro" goko
+sudo useradd -m -s /bin/bash -g sales -c "Sunday Adebayo" sade
+sudo useradd -m -s /bin/bash -g sales -c "David James" djam
 
-This naming convention prioritizes uniqueness and ease of administration while remaining consistent across the organization.
+# Finance
+sudo useradd -m -s /bin/bash -g finance -c "Deborah Ibrahim" dibr
+sudo useradd -m -s /bin/bash -g finance -c "Chioma Eze" ceze
+sudo useradd -m -s /bin/bash -g finance -c "Favour Akinyemi" faki
 
-Commands Used
+# HR
+sudo useradd -m -s /bin/bash -g hr -c "Daniel Ojo" dojo
+sudo useradd -m -s /bin/bash -g hr -c "Samuel Akinwale" saki
+sudo useradd -m -s /bin/bash -g hr -c "Ruth Akinlabi" raki
+```
 
-sudo useradd -m -s /bin/bash -g engineering \
--c "Emmanuel Adeyemi" eadeyemi
+Passwords assigned using:
+```bash
+sudo passwd <username>
+```
 
-The same approach was used for every employee.
+Forced change at first login:
+```bash
+sudo passwd -e <username>
+```
 
-Passwords were assigned using:
+## Verification
 
-sudo passwd username
-
-Users were then required to change their passwords during their first login:
-
-sudo passwd -e username
-
-Verification
-
-User accounts were verified using:
-
-id username
-
+Account and group membership:
+```bash
+id <username>
+```
+Example:
+```text
 uid=1001(eadeyemi) gid=1002(engineering) groups=1002(engineering)
+```
 
-User information was verified using:
-
-getent passwd username
-
+Full account details:
+```bash
+getent passwd <username>
+```
+Example:
+```text
 eadeyemi:x:1001:1002:Emmanuel Adeyemi:/home/eadeyemi:/bin/bash
+```
 
-Password expiration policy was confirmed using:
+Password expiration status:
+```bash
+sudo passwd -S <username>
+```
 
-sudo passwd -S username
+Group membership across the department:
+```bash
+getent group engineering sales finance hr
+```
 
-Challenges Encountered
+## Challenges Encountered
 
-Several minor syntax mistakes occurred during onboarding:
+During implementation, a naming inconsistency was introduced while creating
+user accounts. Some usernames followed the original convention of using the
+employee's first initial and surname (e.g., `eadeyemi`), while others were
+created using shortened forms (e.g., `goko`, `raki`).
 
-A missing space between the user's full name and username caused useradd to display its usage message.
-getent password was mistakenly used instead of getent passwd.
-One password entry failed because the confirmation did not match and had to be re-entered successfully.
+Since passwords had already been assigned and the accounts had not yet been
+integrated into any production services, two approaches were considered:
 
-These issues were identified, corrected, and documented during implementation.
-During implementation, a naming inconsistency was introduced while creating user accounts. Some usernames followed the original convention of using the employee's first initial and surname (e.g., eadeyemi), while others were created using shortened forms (e.g., goko, raki).
+- Renaming the existing user accounts using `usermod`.
+- Keeping the existing usernames and formally adopting the shortened format
+  as the project's username convention.
 
-Since passwords had already been assigned and the accounts had not yet been integrated into any production services, two approaches were considered:
+To avoid unnecessary administrative changes and maintain project momentum,
+the second approach was chosen. As a result, the shortened usernames became
+the official naming convention for the TechNova Homelab project.
 
-Renaming the existing user accounts using usermod.
-Keeping the existing usernames and formally adopting the shortened format as the project's username convention.
+## Lessons Learned
 
-To avoid unnecessary administrative changes and maintain project momentum, the second approach was chosen.
+- Linux usernames only need to be unique — naming convention is a
+  readability choice, not a functional requirement.
+- The `-c` option stores descriptive info (full name) in the GECOS field.
+- `passwd -e` enforces an immediate password change at next login.
+- Verifying after each account creation (`id`, `getent passwd`) catches
+  mistakes early, before they compound across multiple accounts.
+- Real projects rarely follow the original spec exactly knowing when to
+  formalize a deviation (rather than backtrack) is itself a practical skill.
 
-As a result, the shortened usernames became the official naming convention for the TechNova Homelab project.
+## Production Considerations
 
-Lessons Learned
+In enterprise environments, accounts are rarely created manually one by
+one — they're provisioned through centralized identity management systems
+or automated onboarding scripts. The accounts here were created manually
+for learning purposes, but the group-based identity model established now
+is designed to support automation later, when onboarding scales to dozens
+of employees at once.
 
-Linux usernames should follow a consistent naming convention.
-The -c option stores descriptive user information in the GECOS field.
-Password expiration can be enforced immediately using passwd -e.
-Verification after each administrative action helps identify configuration mistakes early.
-Small syntax errors are common during manual administration and reinforce the importance of verifying commands before execution.
+## Skills Practiced
 
-Skills Practiced
-Linux user management (useradd)
-Account verification (id, getent)
-Password management (passwd)
-Password expiration policies
-Linux identity management
-Group-based access control
-User provisioning best practices
+- Linux user management (`useradd`)
+- Account verification (`id`, `getent`)
+- Password management (`passwd`)
+- Password expiration policies
+- Group-based access control
+- Organizational/documentation decision-making under changing requirements
 
-Status
+## Status
 
-✅ Completed
+**✅ Completed**
 
-All TechNova employees have been successfully onboarded with secure Linux accounts, assigned to the appropriate department groups, and configured to change their passwords on first login.
+12 employee accounts created across Engineering, Sales, Finance, and HR.
+All accounts have home directories, Bash shells, correct group membership,
+and expired passwords forcing a first-login change.
+
+Ready for **Task 4 — Secure Shared Workspaces**.
