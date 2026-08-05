@@ -5,3 +5,151 @@ sales:x:1003:
 hr:x:1004:
 finance:x:1005:
 Status: PASS — all four groups exist, no members assigned yet.Result:
+
+
+# =====================================================
+# TechNova Homelab
+# Chapter 1 – Building the Foundation
+# Task 3 – Employee Onboarding
+# Verification Log
+# =====================================================
+
+Date: 2026-08-05
+Administrator: ruth1
+Hostname: DESKTOP-DD7VGNC
+Operating System: Ubuntu 24.04.4 LTS (WSL2)
+
+-------------------------------------------------------
+Verification Objective
+-------------------------------------------------------
+
+Confirm that all TechNova employees have been successfully
+provisioned with Linux user accounts and configured according
+to company standards.
+
+Requirements verified:
+
+[✓] User account created
+[✓] Home directory created
+[✓] Default shell is Bash
+[✓] Correct primary department group assigned
+[✓] GECOS (Full Name) configured
+[✓] Password assigned
+[✓] Password expiration enforced (change required at first login)
+
+-------------------------------------------------------
+Department Administrators
+-------------------------------------------------------
+
+Engineering
+------------
+eadeyemi
+
+Sales
+-----
+goko
+
+Human Resources
+---------------
+dibr
+
+Finance
+-------------------
+dojo
+
+-------------------------------------------------------
+Department Employees
+-------------------------------------------------------
+
+Engineering
+------------
+mogunleye
+ebello
+
+Sales
+-----
+sade
+djam
+
+Finance
+-------
+faki
+ceze
+
+Human Resources
+---------------
+raki
+saki
+
+-------------------------------------------------------
+Verification Commands Executed
+-------------------------------------------------------
+
+# Verify user exists
+
+id eadeyemi
+id mogunleye
+id ebello
+id goko
+id sade
+id djam
+id dakinyemi
+id faki
+id ceze
+id raki
+id dojo
+id saki
+
+# Verify account information
+
+getent passwd eadeyemi
+
+# Verify password status
+
+sudo passwd -S eadeyemi
+
+-------------------------------------------------------
+Observations
+-------------------------------------------------------
+
+• All users were successfully created.
+
+• Every user has a dedicated home directory.
+
+• Default login shell verified as /bin/bash.
+
+• Primary group membership correctly matches the employee's department.
+
+• Password change is required upon first login.
+
+• User information (GECOS field) successfully populated.
+
+-------------------------------------------------------
+Issues Encountered
+-------------------------------------------------------
+
+1. During implementation, several usernames were created
+using shortened forms instead of the originally planned
+first-initial + surname convention.
+
+Examples:
+
+Grace Okoro      -> goko
+Ruth Akinlabi    -> raki
+Samuel Akinwale  -> saki
+
+After reviewing the impact, the shortened usernames were
+adopted as the official TechNova username convention rather
+than recreating existing accounts.
+
+2. Minor command syntax mistakes occurred during manual
+account creation (missing spaces and incorrect command
+spelling). These were corrected immediately and verified.
+
+-------------------------------------------------------
+Result
+-------------------------------------------------------
+
+STATUS: PASSED
+
+Task 3 successfully completed.
