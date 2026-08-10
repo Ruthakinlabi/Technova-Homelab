@@ -1,0 +1,5 @@
+Invalid Records Report — Mon Aug 10 13:05:21 PDT 2026
+-----------------------------------
+Row 28: missing full_name   (raw: ,Finance,Accountant)
+Row 30: invalid department 'Enginering'   (raw: Obiora Madu,Enginering,Software Engineer)
+Row 32: missing role   (raw: Yusuf Tanko,Finance,)
