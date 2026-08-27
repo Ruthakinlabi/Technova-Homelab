@@ -8,6 +8,9 @@
 INPUT_FILE="$1"
 BATCH_DATE=$(date +%Y-%m-%d)
 
+source "$(dirname "$0")/log_utils.sh"
+init_log
+
 if [ -z "$INPUT_FILE" ]; then
     echo "Usage: $0 <path-to-valid-hires-csv>"
     exit 1
@@ -47,6 +50,7 @@ update_employee_matrix() {
 
     if [ -z "$dept_path" ]; then
         echo "[SKIPPED] $full_name — no path mapping found for department '$department'"
+        log_event "update_matrices.sh" "SKIP" "$full_name — no path mapping found for department '$department'"
         skipped_count=$((skipped_count + 1))
         return
     fi
@@ -55,12 +59,11 @@ update_employee_matrix() {
 
     if ! sudo test -f "$matrix_file"; then
         echo "[SKIPPED] $full_name — responsibility_matrix.txt not found for $department"
+        log_event "update_matrices.sh" "SKIP" "$full_name — responsibility_matrix.txt not found for $department"
         skipped_count=$((skipped_count + 1))
         return
     fi
 
-    # Write the section header once per department, only the first time
-    # an employee for that department is processed in this run.
     if [ -z "${HEADER_WRITTEN[$department]}" ]; then
         sudo bash -c "echo '' >> '$matrix_file'"
         sudo bash -c "echo '--- Auto-Onboarded Employees (Batch: $BATCH_DATE) ---' >> '$matrix_file'"
@@ -69,9 +72,11 @@ update_employee_matrix() {
 
     if sudo bash -c "echo '$full_name — $role' >> '$matrix_file'"; then
         echo "[UPDATED] $full_name — $department — $role"
+        log_event "update_matrices.sh" "SUCCESS" "$full_name — $department — $role"
         updated_count=$((updated_count + 1))
     else
         echo "[FAILED]  $full_name — could not write to $matrix_file"
+        log_event "update_matrices.sh" "FAILURE" "$full_name — could not write to $matrix_file"
         skipped_count=$((skipped_count + 1))
     fi
 }
