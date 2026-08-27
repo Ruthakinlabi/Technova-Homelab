@@ -7,6 +7,9 @@
 INPUT_FILE="$1"
 DEFAULT_PASSWORD="Technova2026"
 
+source "$(dirname "$0")/log_utils.sh"
+init_log
+
 if [ -z "$INPUT_FILE" ]; then
     echo "Usage: $0 <path-to-valid-hires-csv>"
     exit 1
@@ -43,6 +46,7 @@ set_employee_password() {
 
     if ! id "$username" &>/dev/null; then
         echo "[SKIPPED] $full_name ($username) — account does not exist"
+        log_event "set_passwords.sh" "SKIP" "$full_name ($username) — account does not exist"
         skipped_count=$((skipped_count + 1))
         return
     fi
@@ -50,10 +54,12 @@ set_employee_password() {
     if echo "${username}:${DEFAULT_PASSWORD}" | sudo chpasswd 2>/dev/null; then
         sudo passwd -e "$username" &>/dev/null
         echo "[SET]     $full_name — username: $username — password expired, must change at login"
+        log_event "set_passwords.sh" "SUCCESS" "$full_name — username: $username — password expired, must change at login"
         echo "$username — $full_name" >> "$CREDENTIALS_LOG"
         set_count=$((set_count + 1))
     else
         echo "[FAILED]  $full_name ($username) — chpasswd failed"
+        log_event "set_passwords.sh" "FAILURE" "$full_name ($username) — chpasswd failed"
         skipped_count=$((skipped_count + 1))
     fi
 }
