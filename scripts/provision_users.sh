@@ -5,6 +5,9 @@
 
 INPUT_FILE="$1"
 
+source "$(dirname "$0")/log_utils.sh"
+init_log
+
 if [ -z "$INPUT_FILE" ]; then
     echo "Usage: $0 <path-to-valid-hires-csv>"
     exit 1
@@ -43,7 +46,6 @@ generate_username() {
     username=$(echo "${first_initial}${last_name}" | tr '[:upper:]' '[:lower:]')
     echo "$username"
 }
-
 create_employee_account() {
     local full_name="$1"
     local department="$2"
@@ -56,6 +58,7 @@ create_employee_account() {
     # skip rather than error out, so one conflict doesn't halt the batch.
     if id "$username" &>/dev/null; then
         echo "[SKIPPED] $full_name ($username) — username already exists"
+        log_event "provision_users.sh" "SKIP" "$full_name ($username) — username already exists"
         skipped_count=$((skipped_count + 1))
         return
     fi
@@ -64,21 +67,21 @@ create_employee_account() {
 
     if [ -z "$group" ]; then
         echo "[SKIPPED] $full_name — no group mapping found for department '$department'"
+        log_event "provision_users.sh" "SKIP" "$full_name — no group mapping found for department '$department'"
         skipped_count=$((skipped_count + 1))
         return
     fi
 
     if sudo useradd -m -s /bin/bash -g "$group" -c "$full_name" "$username" 2>/dev/null; then
         echo "[CREATED] $full_name — username: $username — department: $department — role: $role"
+        log_event "provision_users.sh" "SUCCESS" "$full_name — username: $username — department: $department — role: $role"
         created_count=$((created_count + 1))
     else
         echo "[FAILED]  $full_name ($username) — useradd command failed"
+        log_event "provision_users.sh" "FAILURE" "$full_name ($username) — useradd command failed"
         skipped_count=$((skipped_count + 1))
     fi
 }
-
-echo "Provisioning employees from $INPUT_FILE ..."
-echo "-----------------------------------"
 
 # Using process substitution (< <(...)) instead of a pipe here —
 # this keeps the while loop running in the CURRENT shell, not a
