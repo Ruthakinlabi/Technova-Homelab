@@ -24,7 +24,8 @@ OUTPUT_DIR="$(dirname "$INPUT_FILE")"
 REPORT_FILE="$OUTPUT_DIR/offboarding_report.txt"
 BATCH_DATE=$(date '+%Y-%m-%d')
 
-echo "Offboarding Report — Batch: $BATCH_DATE" > "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+echo "Offboarding Report — Batch: $BATCH_DATE" >> "$REPORT_FILE"
 echo "-----------------------------------" >> "$REPORT_FILE"
 
 offboarded_count=0
