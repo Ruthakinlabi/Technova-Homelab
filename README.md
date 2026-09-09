@@ -21,6 +21,7 @@ docs/
 ├── task-01-employee-data-source.md
 └── ...
 
+
 Each task file includes the business requirement, the commands used, verification steps, real terminal output (including errors and how they were resolved), and design decisions/rationale.
 
 ## Progress
@@ -37,7 +38,7 @@ Each task file includes the business requirement, the commands used, verificatio
 - [x] Task 9 — Employee Offboarding
 - [x] Task 10 — Security Audit
 
-*(Chapter 1 was refined from an originally planned 15 tasks down to 9 high-quality ones — several validation-only tasks were consolidated into the final Security Audit rather than repeating tests already proven earlier in the chapter.)*
+*(Refined from an originally planned 15 tasks down to 9 high-quality ones.)*
 
 **Appendix 1 — Additional Departments:** Marketing, Customer Support, Product Management, and DevOps added to reflect company growth ahead of Chapter 2.
 
@@ -49,11 +50,27 @@ Each task file includes the business requirement, the commands used, verificatio
 - [x] Task 3 — Initial Password Generation
 - [x] Task 4 — Automated Directory Updates
 - [x] Task 5 — Logging and Error Reporting
-- [ ] Task 6 — Bulk Offboarding
-- [ ] Task 7 — Script Validation & Idempotency
-- [ ] Task 8 — Automation Audit
+- [x] Task 6 — Bulk Offboarding
+- [x] Task 7 — Automated Welcome Email Simulation
+- [x] Task 8 — Automation Audit
 
-*(70 real new-hire records processed through Tasks 1–5: validated, provisioned, secured with a temporary password + forced first-login reset, added to departmental responsibility matrices, and logged end-to-end through a shared logging utility. Two known gaps carried forward for a Chapter 3 appendix: 23 employees in the four Appendix 1 departments still need their responsibility matrices created, and two matrix files contain leftover test-data duplicates pending cleanup.)*
+**Appendix 1 — Missing Department Matrices & Duplicate-Data Cleanup:** created `responsibility_matrix.txt` for the four Appendix-1 departments and deduplicated contaminated entries in Engineering and Sales, introduced during earlier test runs.
+
+**Appendix 2 — Role Correction, GECOS Fix, Cumulative Reporting:** corrected an inaccurate employee role, fixed a cosmetic account typo, and changed the offboarding report script from overwrite to append.
+
+*(70 real new-hire records processed end-to-end: validated, provisioned, secured with a temporary password + forced first-login reset, added to departmental responsibility matrices, welcomed via a generated message, and logged throughout via a shared logging utility. All known issues from the Chapter 2 audit have since been resolved.)*
+
+### Chapter 3 — Remote Workforce (in progress)
+- [x] Task 1 — SSH Server Setup & Hardening Baseline
+- [x] Task 2 — SSH Key-Pair Generation & Distribution
+- [x] Task 3 — Automated SSH Key Provisioning
+- [x] Task 4 — Disabling Password Authentication
+- [ ] Task 5 — Disabling Direct Root Login
+- [ ] Task 6 — Fail2Ban Installation & Configuration
+- [ ] Task 7 — Remote Access Validation & Testing
+- [ ] Task 8 — Security Audit
+
+*(SSH server installed and hardened; 78 of 85 employees now have working SSH key pairs, verified via live login tests; password authentication disabled system-wide with a single deliberate exception preserved for server administration.)*
 
 ## Environment
 
@@ -62,3 +79,5 @@ Built and tested on Ubuntu (WSL2).
 ## Author
 
 Ruth Akinlabi
+
+
