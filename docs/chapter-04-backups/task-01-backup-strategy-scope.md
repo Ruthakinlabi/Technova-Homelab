@@ -1,44 +1,51 @@
-# Chapter 4, Task 1 — Backup Strategy & Scope
+# Chapter 4, Task 1 — Deciding What to Back Up
 
-## Business Requirement
+## The Situation
 
-A developer's deleted file can't be recovered — that incident is already over, but it forced a question TechNova has never had to answer before: what happens the next time this happens? Management's instruction is simple to state and easy to get wrong in practice: make sure this doesn't happen again without a way back. But "back everything up" isn't a real plan. Before any backup script gets written, TechNova needs an actual decision about what gets backed up, how often, where, and — just as importantly — what deliberately doesn't.
+Someone accidentally deleted an important file at TechNova, and there was no way to get it back. It was gone for good. That's what started this whole chapter — management wants to make sure that never happens again.
 
-## Design Principle Used to Decide Scope
+The easy answer would be "just back up everything." But that's actually not a good plan. If you back up *everything*, including things that don't matter or that already exist safely somewhere else, you waste time and space, and it gets harder to find what actually matters when you really need it.
 
-The test applied to everything on the server: **is this irreplaceable, or is it regenerable from something else that's already safe?** Irreplaceable data goes in the backup. Regenerable data is deliberately left out, with the reasoning documented — not because it wasn't considered, but because backing it up would add noise without adding real protection.
+So before writing anything that actually creates backups, the first job is simpler: **decide exactly what's worth saving, what isn't, and why.**
 
-## In Scope — Backed Up Daily
+## How We Decided What to Back Up
 
-| Item | Path | Why |
-|---|---|---|
-| Department data | `/srv/technova/departments/` | Handbooks, confidential files, and responsibility matrices — if lost, nobody can recreate them from memory. |
-| Archived former employees | `/srv/technova/archived_employees/` | This data exists specifically to be preserved for audit purposes (Chapter 2, Task 6's disable-don't-delete decision). Losing it defeats the reason it was archived in the first place. |
-| SSH server configuration | `/etc/ssh/sshd_config`, `/etc/ssh/sshd_config.bak` | Represents real, hard-won configuration work from Chapter 3 (three separate debugging sessions' worth). Losing it means re-solving already-solved problems. |
-| Fail2Ban configuration | `/etc/fail2ban/jail.local` | Same reasoning — the configuration effort shouldn't be lost even while the service itself is pending a fix. |
-| Employee `authorized_keys` files | `/home/*/.ssh/authorized_keys` | If lost, every employee's SSH access breaks simultaneously, even though their own private keys remain safe on their own machines. A single point of failure worth protecting. |
+We asked one simple question about everything on the server: **"If this got deleted right now, could we get it back some other way, or would it be gone forever?"**
 
-## Explicitly Out of Scope — With Reasoning
+- If it would be gone forever → back it up.
+- If we could easily get it back another way → don't bother backing it up.
 
-| Item | Why Excluded |
+## What We're Backing Up (and Why)
+
+| What it is | Why it matters |
 |---|---|
-| The `Technova-Homelab` Git repository | Already continuously backed up via GitHub. A second local backup would be redundant. |
-| `scripts/data/*.csv`, `onboarding_log.txt`, `credentials_log.txt` | Working artifacts from Chapter 2's automation runs. Historically interesting, not currently load-bearing — the accounts they created still exist and function independently of these files. |
-| Employee **private** SSH keys (`id_ed25519`) | Deliberately excluded on principle, not oversight. A private key that exists in two places is no longer fully private, which undermines the entire point of key-based authentication built in Chapter 3. If an employee loses their private key, the correct real-world response is to generate a new key pair and update `authorized_keys` — not restore the old private key from backup. |
-| General system account files (`/etc/passwd`, `/etc/group`, etc.) | A conscious scope decision for this project's current scale: if the whole system were lost, it would be rebuilt from the already-documented Chapter 1–3 process. Real companies at larger scale often do back these up — noted here as a boundary of this lab's current scope, not a gap nobody noticed. |
+| Department folders (handbooks, private documents, staff lists) | If these are deleted, there's no way to recreate them. Nobody remembers a private company document word-for-word. |
+| Records of employees who have left the company | These are kept on purpose, in case they're ever needed later. Losing them defeats the whole reason they were saved. |
+| The settings that control secure remote login | This took a lot of real trial-and-error to get working correctly. Losing it means doing all that work over again from scratch. |
+| The settings for the security tool that blocks suspicious login attempts | Same reason — real effort went into this, even though the tool itself isn't fully working yet. |
+| The list of "approved logins" for each employee | If this is lost, every single employee gets locked out of the server at the same time. That's a big deal, so it's worth protecting. |
 
-## Backup Frequency
+## What We're NOT Backing Up (and Why That's OK)
 
-**Daily**, for everything in scope. Department files change often enough (new hires added to matrices, occasional handbook edits) that daily makes sense. SSH/Fail2Ban configs change rarely, but they're small enough that including them in the same daily run adds negligible cost — simpler than maintaining a separate schedule just for infrequently-changing files.
+| What it is | Why we're skipping it |
+|---|---|
+| The project's own file history on GitHub | This is already safely stored online. Backing it up again here would just be doing the same job twice. |
+| Old spreadsheets and log files from earlier automation work | Interesting to look back on, but nothing currently depends on them. The actual results of that work (real employee accounts) don't disappear if these files do. |
+| Employees' private secret keys used to log in | This one's on purpose, not a mistake. A "private" key that's copied somewhere else stops being private. If someone loses their key, the right fix is to give them a brand new one — not dig up an old copy. |
+| Basic account information built into the operating system itself | If the whole server had to be rebuilt from nothing, we already have detailed step-by-step notes from Chapters 1 through 3 showing exactly how to recreate it. |
 
-## Backup Location — An Honest Limitation
+## How Often We'll Back Things Up
 
-Backups will be stored at `/srv/backups/` — a separate directory tree from `/srv/technova`, protecting against the specific incident that started this chapter (someone accidentally deleting a file *within* the department folders).
+**Once a day.** The files that matter most (department records) change fairly often — new people get added, documents get updated — so daily makes sense. The security settings barely ever change, but they're small, so there's no harm including them in the same daily backup instead of making things more complicated with a separate schedule.
 
-**This is not a true offsite or separate-media backup**, and that limitation is stated here deliberately rather than glossed over: this lab runs on a single WSL instance with no second disk, no separate machine, and no cloud storage configured. A backup on the same physical disk as the original data would not survive a full disk failure. This is a real, honest constraint of the environment, not an oversight — and it's the reason this chapter's task list includes an optional later task (Offsite/Secondary Copy) to explore what a genuinely separate backup location would look like, time permitting.
+## Where the Backup Will Actually Live
 
-## Status
+The backup copies will be stored in a separate folder, away from the original files. This protects against the exact mistake that started this whole chapter — someone accidentally deleting a file where the real, active data lives.
 
-**✅ Completed**
+**Being honest about a limitation here:** a truly safe backup is normally stored on a completely separate device, or somewhere off-site — that way, if the whole computer breaks, the backup still survives. Right now, everything is running on one single computer, so the backup will technically still be sitting on the same machine as the original files. It's better than nothing (it protects against accidental deletion), but it wouldn't survive that one computer failing completely. This is a real limitation of the current setup, worth admitting honestly rather than pretending it's a perfect solution — and it's something we may improve on later.
 
-Backup scope decided and documented: 5 categories of data identified as in-scope with individual justification, 4 categories explicitly excluded with reasoning, daily frequency selected based on actual data change patterns, and a clear-eyed limitation recorded regarding backup location within this lab's constraints.
+## What's Done
+
+We've now clearly decided: what to back up, what not to, how often, and where — along with honest reasons for every choice, including the one thing this plan doesn't fully solve yet.
+
+Next: actually building the backup itself.
